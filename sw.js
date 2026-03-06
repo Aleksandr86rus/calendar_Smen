@@ -1,20 +1,37 @@
-// sw.js — минимальный кэширующий service worker для PWA
-const CACHE_NAME = 'calendar-smen-v1';
-const urlsToCache = [
+const CACHE_NAME = 'shift-calendar-v2026';
+const ASSETS_TO_CACHE = [
+  './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-self.addEventListener('install', event => {
+// Установка: кешируем файлы для работы без интернета
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
 });
 
-self.addEventListener('fetch', event => {
+// Активация: чистим старый кеш, если обновили версию
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    })
+  );
+});
+
+// Обработка запросов: сначала смотрим в кеш, потом в сеть
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
+    })
   );
 });
