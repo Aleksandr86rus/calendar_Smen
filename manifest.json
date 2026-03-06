@@ -1,15 +1,14 @@
-{
-  "name": "График Смен 2026",
-  "short_name": "График",
-  "start_url": "/calendar_Smen/",
-  "display": "standalone",
-  "background_color": "#050505",
-  "theme_color": "#050505",
-  "icons": [
-    {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwNTA1MDUiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxYTFhMmUiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYiIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM4QjVDRjYiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2RDI4RDkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYyIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwNkI2RDQiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwODkxQjIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0idXJsKCNhKSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyOCA5Nikgc2NhbGUoMi41KSI+PHBhdGggZD0iTTUwIDI1QzUwIDExLjE5IDYxLjE5IDAgNzUgMHM4NSAzOC4wNiA4NSA4NWMwIDEzLjgxLTExLjE5IDI1LTI1IDI1UzYxLjE5IDExMS4xOSA2MS4xOSAxMjVjMCAxMy44MSAxMS4xOSAyNSAyNSAyNXM4NS0z80iIDg1LTg1YzAtMTMuODEtMTEuMTkgMjUtMjUgMjVTNjAgMTM4LjgxIDYwIDEyNUM2MCAxMTEuMTkgNTAgMTAwIDUwIDEwMFYyNXoiIGZpbGw9InVybCgjYikiIG9wYWCITYI5LjgiLz48cGF0aCBkPSJNNTAgMTU1QzUwIDE2OC44MSAzOC44MSAxODAgMjUgMTgwUzAgMTQxLjk0IDAgOTdDMCA4My4xOSAxMS4xOSA3MiAyNSA3MnMzOC44MSAxMy44MSAzOC44MSAyNVUzMy42OCA1My43MSAzMy42OCA2N0MzMy42OCA4MSAxODAgODEgODAgLTI4QzI4LjE5IDU3IDUwIDQ1LjgxIDUwIDQ1VjE1NXoiIGZpbGw9InVybCgjYykiIG9wYWCITYI5LjgiLz48L2c+PC9zdmc+",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+"icons": [
+  {
+    "src": "/calendar_Smen/icon-192.png",
+    "sizes": "192x192",
+    "type": "image/png",
+    "purpose": "any maskable"
+  },
+  {
+    "src": "/calendar_Smen/icon-512.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any maskable"
+  }
+]
