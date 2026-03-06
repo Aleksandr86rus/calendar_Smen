@@ -1,8 +1,7 @@
 const CACHE_NAME = 'shift-calendar-v1';
 const ASSETS = [
   '/calendar_Smen/',
-  '/calendar_Smen/index.html',
-  '/calendar_Smen/manifest.json'
+  '/calendar_Smen/index.html'
 ];
 
 self.addEventListener('install', (event) => {
