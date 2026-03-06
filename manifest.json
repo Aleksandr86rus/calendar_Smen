@@ -1,14 +1,11 @@
 {
-  "name": "График смен",
+  "name": "Work Shift 2026 Elite",
   "short_name": "Смены 2026",
-  "description": "График смен на 2026 год",
-  "start_url": "/calendar_Smen/",
+  "description": "График смен Александра Аристархова",
   "start_url": "./index.html",
   "display": "standalone",
-  "display_override": ["fullscreen", "standalone"],
-  "background_color": "#0f172a",
-  "theme_color": "#2563eb",
-  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "icon-192.png",
