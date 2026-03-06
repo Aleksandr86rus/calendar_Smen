@@ -1,21 +1,20 @@
-
-
 {
-  "name": "Shift 2026 Elite",
-  "short_name": "Shift2026",
-  "start_url": "index.html",
+  "name": "Work Shift 2026 Elite",
+  "short_name": "Смены 2026",
+  "start_url": "/calendar_Smen/?source=pwa",
   "display": "standalone",
-  "background_color": "#050505",
-  "theme_color": "#050505",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "scope": "/calendar_Smen/",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://cdn-icons-png.flaticon.com/192/2370/2370264.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/2370/2370264.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
