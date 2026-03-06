@@ -1,23 +1,27 @@
 {
   "name": "Work Shift 2026 Elite",
   "short_name": "Смены 2026",
-  "start_url": "/calendar_Smen/?source=pwa",
+  "description": "График смен на 2026 год",
+  "start_url": "/calendar_Smen/",
+  "id": "/calendar_Smen/",
+  "scope": "/calendar_Smen/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "scope": "/calendar_Smen/",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/192/2370/2370264.png",
+      "src": "/calendar_Smen/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2370/2370264.png",
+      "src": "/calendar_Smen/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ]
 }
+
