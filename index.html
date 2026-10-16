@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Work Shift Elite</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        :root{
+            color-scheme:dark;
+            --bg:#000;--surface:rgba(255,255,255,.03);--surface-hover:rgba(255,255,255,.06);
+            --border:rgba(255,255,255,.08);--text:#fff;--text-dim:#666;
+            --night:linear-gradient(135deg,#7C3AED,#4C1D95);
+            --day:linear-gradient(135deg,#0EA5E9,#0369A1);
+            --vac:linear-gradient(135deg,#F59E0B,#B45309);
+            --extra:linear-gradient(135deg,#22C55E,#15803D);
+            --sick:linear-gradient(135deg,#EF4444,#B91C1C);
+            --off:rgba(255,255,255,.02);--accent:#8B5CF6;
+            --success:#22C55E;--warning:#F59E0B;--danger:#EF4444;
+            --nav-bg:rgba(0,0,0,.9);--modal-bg:#111;--card-shadow:0 10px 30px rgba(0,0,0,.5);
+            --bg-grad:radial-gradient(circle at 50% -20%,#1e1b4b 0%,#000 70%);
+        }
+        [data-theme="light"]{
+            color-scheme:light;
+            --bg:#f0f2f5;--surface:#ffffff;--surface-hover:#f5f5f7;
+            --border:rgba(0,0,0,.08);--text:#1a1a1a;--text-dim:#6b7280;
+            --off:rgba(0,0,0,.03);--accent:#7C3AED;
+            --nav-bg:rgba(255,255,255,.95);--modal-bg:#fff;--card-shadow:0 4px 20px rgba(0,0,0,.08);
+            --bg-grad:radial-gradient(circle at 50% -20%,#e0e7ff 0%,#f0f2f5 70%);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{
+            font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);
+            padding:env(safe-area-inset-top) 16px 120px;
+            background-image:var(--bg-grad);
+            min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;
+        }
+        .container{max-width:500px;margin:0 auto}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+        .bottom-nav{
+            position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);
+            backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+            border-top:1px solid var(--border);display:flex;justify-content:space-around;
+            padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:999;
+        }
+        .nav-item{
+            display:flex;flex-direction:column;align-items:center;gap:4px;
+            background:none;border:none;color:var(--text-dim);font-family:inherit;
+            font-size:.65rem;font-weight:600;cursor:pointer;padding:8px 12px;
+            border-radius:16px;transition:all .3s;
+        }
+        .nav-item.active{color:var(--accent)}
+        .nav-item .nav-icon{font-size:1.3rem}
+        .nav-item:active{transform:scale(.9)}
+
+        .page{display:none}.page.active{display:block;animation:fadeInUp .4s ease-out}
+
+        .bento-card{
+            background:var(--surface);border:1px solid var(--border);border-radius:28px;
+            padding:24px;backdrop-filter:blur(20px);box-shadow:var(--card-shadow);
+            transition:all .3s;margin-bottom:12px;
+        }
+        .bento-card:active{transform:scale(.98)}
+        h1{font-weight:800;font-size:1.6rem;letter-spacing:-1px;margin-top:4px}
+        .user-label{color:var(--text-dim);font-size:.85rem;text-transform:uppercase;letter-spacing:1px}
+
+        .widgets-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+        .widget-card{
+            background:var(--surface);border:1px solid var(--border);border-radius:24px;
+            padding:20px;cursor:pointer;transition:all .3s;
+        }
+        .widget-card:active{transform:scale(.96)}
+        .widget-icon{font-size:1.5rem;margin-bottom:8px}
+        .widget-value{font-weight:800;font-size:1.4rem;margin-bottom:2px}
+        .widget-label{color:var(--text-dim);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+
+        .today-hero{
+            background:var(--surface);border:1px solid var(--border);border-radius:32px;
+            padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden;
+        }
+        .today-hero.night-shift{border-color:rgba(124,58,237,.3)}
+        .today-hero.day-shift{border-color:rgba(14,165,233,.3)}
+        .today-hero.vacation-shift{border-color:rgba(245,158,11,.3)}
+        .today-hero.extra-shift{border-color:rgba(34,197,94,.3)}
+        .today-hero.sick-shift{border-color:rgba(239,68,68,.3)}
+        .today-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+        .today-hero.night-shift::before{background:var(--night)}
+        .today-hero.day-shift::before{background:var(--day)}
+        .today-hero.vacation-shift::before{background:var(--vac)}
+        .today-hero.extra-shift::before{background:var(--extra)}
+        .today-hero.sick-shift::before{background:var(--sick)}
+        .today-widget{
+            position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+            background:var(--nav-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border:1px solid var(--border);border-radius:100px;padding:8px 18px;
+            display:none;align-items:center;gap:10px;z-index:998;
+            box-shadow:var(--card-shadow);font-weight:700;font-size:.85rem;
+            max-width:90%;white-space:nowrap;
+        }
+        .today-widget.show{display:flex}
+        .today-widget .tw-emoji{font-size:1.2rem}
+        .today-widget .tw-label{color:var(--text)}
+        .today-widget .tw-date{color:var(--text-dim);font-size:.75rem;font-weight:600}
+        .today-emoji{font-size:3rem;margin-bottom:12px;display:block}
+        .today-type{font-weight:800;font-size:1.5rem;margin-bottom:4px}
+        .today-date{color:var(--text-dim);font-size:.9rem}
+        .today-next{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-dim)}
+        .today-next strong{color:var(--text)}
+
+        .legend-mini{
+            display:flex;justify-content:space-around;flex-wrap:wrap;gap:8px;background:var(--surface);
+            padding:14px;border-radius:20px;border:1px solid var(--border);margin-bottom:20px;
+        }
+        .l-item{display:flex;align-items:center;gap:6px;font-size:.65rem;font-weight:700;color:var(--text-dim)}
+        .l-dot{width:10px;height:10px;border-radius:3px}
+
+        .year-selector{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
+        .year-btn{
+            background:var(--surface);border:1px solid var(--border);color:white;
+            width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;transition:all .2s;
+        }
+        .year-btn:active{transform:scale(.9);background:var(--surface-hover)}
+        .year-btn:disabled{opacity:.2;cursor:default}
+        .year-display{font-weight:800;font-size:1.8rem;min-width:80px;text-align:center}
+
+        .month-box{
+            background:var(--surface);border:1px solid var(--border);border-radius:32px;
+            margin-bottom:20px;transition:all .5s cubic-bezier(.4,0,.2,1);
+        }
+        .month-trigger{padding:24px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+        .month-title{font-weight:700;font-size:1.2rem}
+        .month-badge{display:inline-flex;gap:6px;margin-left:10px}
+        .month-badge span{font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:8px;background:rgba(255,255,255,.05)}
+        .month-box.collapsed{opacity:.3;transform:scale(.96);filter:grayscale(.8)}
+        .month-box.collapsed .month-content{display:none}
+        .month-content{padding:0 20px 24px}
+
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+        .w-day{text-align:center;color:var(--text-dim);font-size:.6rem;font-weight:800;margin-bottom:12px}
+        .d-cell{
+            aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+            border-radius:14px;font-size:.85rem;font-weight:700;background:var(--off);
+            position:relative;transition:all .2s;cursor:pointer;
+        }
+        .d-cell:active{transform:scale(.85)}
+        .d-cell.night{background:var(--night);box-shadow:0 5px 15px rgba(124,58,237,.4)}
+        .d-cell.day-sh{background:var(--day);box-shadow:0 5px 15px rgba(14,165,233,.4)}
+        .d-cell.vacation{background:var(--vac);box-shadow:0 5px 15px rgba(245,158,11,.3)}
+        .d-cell.extra{background:var(--extra);box-shadow:0 5px 15px rgba(34,197,94,.3)}
+        .d-cell.sick{background:var(--sick);box-shadow:0 5px 15px rgba(239,68,68,.3)}
+        .d-cell.today-cell{box-shadow:0 0 0 2px #fff,0 5px 20px rgba(255,255,255,.3);animation:pulse 2s infinite}
+        .today-mark{position:absolute;bottom:4px;width:4px;height:4px;background:#fff;border-radius:50%;box-shadow:0 0 8px #fff}
+        .note-dot{position:absolute;top:4px;right:4px;width:5px;height:5px;background:var(--warning);border-radius:50%}
+
+        .modal-overlay{
+            position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:5000;
+            display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px);
+        }
+        .modal-overlay.active{display:flex}
+        .modal-sheet{
+            background:var(--modal-bg);border-radius:32px 32px 0 0;width:100%;max-width:500px;
+            padding:20px 24px calc(24px + env(safe-area-inset-bottom));
+            animation:slideUp .3s ease-out;max-height:90vh;overflow-y:auto;
+        }
+        .modal-handle{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 20px}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+        .modal-header h2{font-size:1.2rem}
+        .modal-close{background:var(--surface-hover);border:none;color:var(--text);width:36px;height:36px;border-radius:50%;font-size:1.2rem;cursor:pointer}
+        .modal-shift-badge{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:10px 20px;border-radius:16px;font-weight:700;font-size:.9rem;margin-bottom:12px;
+        }
+
+        .note-input,.name-input{
+            width:100%;background:var(--surface-hover);border:1px solid var(--border);
+            border-radius:16px;padding:14px 18px;color:var(--text);font-family:inherit;
+            font-size:.9rem;resize:none;outline:none;transition:border-color .3s;
+        }
+        .note-input:focus,.name-input:focus{border-color:var(--accent)}
+        .note-input::placeholder,.name-input::placeholder{color:var(--text-dim)}
+
+        .modal-actions{display:flex;gap:10px;margin-top:16px}
+        .modal-btn{
+            flex:1;padding:14px;border-radius:16px;border:none;
+            font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;
+        }
+        .modal-btn:active{transform:scale(.95)}
+        .modal-btn.primary{background:var(--accent);color:white}
+        .modal-btn.secondary{background:rgba(255,255,255,.08);color:white}
+
+        .type-selector{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+        .type-chip{
+            padding:10px 14px;border-radius:14px;font-size:.75rem;font-weight:700;
+            border:2px solid var(--border);cursor:pointer;transition:all .2s;background:var(--surface);
+            display:flex;align-items:center;gap:6px;
+        }
+        .type-chip:active{transform:scale(.93)}
+        .type-chip.active{border-color:var(--accent);background:rgba(139,92,246,.15)}
+        .type-chip[data-type="vacation"].active{border-color:#F59E0B;background:rgba(245,158,11,.15)}
+        .type-chip[data-type="extra"].active{border-color:#22C55E;background:rgba(34,197,94,.15)}
+        .type-chip[data-type="sick"].active{border-color:#EF4444;background:rgba(239,68,68,.15)}
+        .type-chip[data-type="night"].active{border-color:#7C3AED;background:rgba(124,58,237,.15)}
+        .type-chip[data-type="day-sh"].active{border-color:#0EA5E9;background:rgba(14,165,233,.15)}
+        .type-chip[data-type="off"].active{border-color:#666;background:rgba(255,255,255,.05)}
+        .type-chip[data-type="reset"].active{border-color:#EF4444;background:rgba(239,68,68,.15)}
+
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;margin-bottom:12px}
+        .stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
+        .stat-row+.stat-row{border-top:1px solid var(--border)}
+        .stat-label{color:var(--text-dim);font-size:.85rem}
+        .stat-value{font-weight:800;font-size:1.1rem}
+        .stat-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.05);overflow:hidden;margin-top:6px}
+        .stat-bar-fill{height:100%;border-radius:3px;transition:width 1s ease-out}
+        .progress-ring{margin:20px auto;display:block}
+
+        .settings-group{margin-bottom:24px}
+        .settings-title{font-weight:700;font-size:.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-left:4px}
+        .settings-item{
+            background:var(--surface);border:1px solid var(--border);border-radius:20px;
+            padding:18px 20px;display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:8px;cursor:pointer;transition:all .2s;
+        }
+        .settings-item:active{background:var(--surface-hover)}
+        .settings-left{display:flex;align-items:center;gap:14px}
+        .settings-icon{font-size:1.3rem}
+        .settings-text .settings-name{font-weight:600;font-size:.95rem}
+        .settings-text .settings-desc{font-size:.75rem;color:var(--text-dim);margin-top:2px}
+        .toggle{
+            width:52px;height:30px;background:rgba(255,255,255,.1);border-radius:15px;
+            position:relative;cursor:pointer;transition:background .3s;border:none;flex-shrink:0;
+        }
+        .toggle.active{background:var(--accent)}
+        .toggle::after{
+            content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;
+            background:white;border-radius:50%;transition:transform .3s;
+        }
+        .toggle.active::after{transform:translateX(22px)}
+
+        .notes-list{margin-top:12px}
+        .note-item{
+            background:var(--surface);border:1px solid var(--border);border-radius:20px;
+            padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;
+        }
+        .note-date{font-weight:700;font-size:.85rem;color:var(--accent)}
+        .note-text{font-size:.85rem;color:var(--text-dim);margin-top:4px}
+        .note-delete{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:4px 8px}
+
+        .profile-form{display:flex;flex-direction:column;gap:12px}
+        .form-group{display:flex;flex-direction:column;gap:6px}
+        .form-label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+        .profile-avatar{
+            width:64px;height:64px;border-radius:50%;background:var(--night);
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.6rem;font-weight:800;box-shadow:0 5px 20px rgba(124,58,237,.4);
+        }
+        .profile-header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+        .profile-header-name{font-weight:800;font-size:1.1rem}
+        .profile-header-role{color:var(--text-dim);font-size:.8rem}
+        .save-name-btn{
+            background:var(--accent);color:white;border:none;padding:14px;border-radius:16px;
+            font-family:inherit;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;margin-top:4px;
+        }
+        .save-name-btn:active{transform:scale(.95)}
+
+        .custom-list{margin-top:12px}
+        .custom-item{
+            background:var(--surface);border:1px solid var(--border);border-radius:16px;
+            padding:14px 18px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;
+        }
+        .custom-item-info{display:flex;align-items:center;gap:10px}
+        .custom-item-icon{font-size:1.2rem}
+        .custom-item-dates{font-size:.85rem;font-weight:600}
+        .custom-item-days{font-size:.75rem;color:var(--text-dim)}
+        .custom-item-del{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:4px 8px}
+        .custom-item-del:active{color:var(--danger)}
+        .add-period-btn{
+            width:100%;padding:16px;border-radius:16px;border:2px dashed var(--border);
+            background:none;color:var(--text-dim);font-family:inherit;font-weight:700;
+            font-size:.85rem;cursor:pointer;transition:all .2s;margin-top:8px;
+        }
+        .add-period-btn:active{border-color:var(--accent);color:var(--accent)}
+        .date-input{
+            flex:1;background:var(--surface-hover);border:1px solid var(--border);
+            border-radius:12px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:.9rem;
+            font-weight:600;outline:none;transition:border-color .3s;
+            -webkit-appearance:none;appearance:none;min-height:44px;
+        }
+        .date-input:focus{border-color:var(--accent)}
+        input[type="date"]::-webkit-calendar-picker-indicator{
+            opacity:.8;cursor:pointer;width:20px;height:20px;
+        }
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1)}
+        input[type="date"]::-webkit-datetime-edit,
+        input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+        input[type="date"]::-webkit-datetime-edit-month-field,
+        input[type="date"]::-webkit-datetime-edit-day-field,
+        input[type="date"]::-webkit-datetime-edit-year-field{color:var(--text)}
+        input[type="date"]::-webkit-datetime-edit-text{color:var(--text-dim);padding:0 4px}
+
+        /* Shift config */
+        .shift-config-card{
+            background:var(--surface);border:1px solid var(--border);border-radius:24px;
+            padding:20px;margin-bottom:12px;
+        }
+        .shift-row{
+            display:flex;justify-content:space-between;align-items:center;
+            padding:14px 0;
+        }
+        .shift-row+.shift-row{border-top:1px solid var(--border)}
+        .shift-row-label{display:flex;align-items:center;gap:10px;font-weight:600;font-size:.9rem}
+        .shift-row-input{
+            width:70px;background:var(--surface-hover);border:1px solid var(--border);
+            border-radius:12px;padding:10px;color:var(--text);font-family:inherit;font-weight:700;
+            font-size:.95rem;text-align:center;outline:none;
+            -webkit-appearance:none;appearance:none;
+        }
+        .shift-row-input:focus{border-color:var(--accent)}
+        select.shift-row-input{
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23aaa' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 10px center;
+            padding-right:28px;text-align:left;
+        }
+        select.shift-row-input option{background:var(--modal-bg);color:var(--text)}
+        .date-start-btn{
+            background:var(--surface-hover);border:1px solid var(--border);border-radius:14px;
+            padding:12px 16px;color:var(--text);font-family:inherit;font-weight:700;
+            font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:8px;
+            transition:all .2s;
+        }
+        .date-start-btn:active{transform:scale(.96);border-color:var(--accent)}
+        .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+        .dp-day-h{text-align:center;font-size:.65rem;font-weight:700;color:var(--text-dim);padding:6px 0}
+        .dp-cell{
+            aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+            border-radius:12px;font-size:.85rem;font-weight:600;cursor:pointer;
+            background:var(--surface-hover);color:var(--text);transition:all .15s;
+        }
+        .dp-cell:active{transform:scale(.9)}
+        .dp-cell.selected{background:var(--accent);color:#fff}
+        .dp-cell.other{opacity:.3}
+        .dp-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+        .dp-nav button{background:var(--surface-hover);border:1px solid var(--border);color:var(--text);
+            width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer}
+        .dp-nav-title{font-weight:800;font-size:1.1rem}
+        .shift-preview{
+            margin-top:16px;padding:16px;background:rgba(255,255,255,.02);
+            border-radius:16px;border:1px solid var(--border);
+        }
+        .shift-preview-title{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;font-weight:700}
+        .shift-preview-bar{display:flex;gap:3px;flex-wrap:wrap}
+        .spb-day{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+        .toast{
+            position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-100px);
+            background:rgba(34,197,94,.9);color:white;padding:14px 24px;
+            border-radius:16px;font-weight:700;font-size:.85rem;
+            z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+            backdrop-filter:blur(10px);white-space:nowrap;
+        }
+        .toast.show{transform:translateX(-50%) translateY(0)}
+        .toast.error{background:rgba(239,68,68,.9)}
+        .toast.info{background:rgba(139,92,246,.9)}
+
+        #pwa-hint{
+            position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+            background:#fff;color:#000;padding:12px 24px;border-radius:100px;
+            font-size:.9rem;font-weight:700;white-space:nowrap;z-index:1000;
+            display:none;box-shadow:0 10px 40px rgba(0,0,0,.5);transition:opacity .5s;
+        }
+        #install-btn{
+            display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+            background:var(--night);color:white;padding:16px 32px;
+            border:1px solid rgba(255,255,255,.2);border-radius:100px;
+            font-weight:800;z-index:2000;box-shadow:0 10px 30px rgba(124,58,237,.6);
+            cursor:pointer;font-family:inherit;font-size:1rem;
+        }
+        ::-webkit-scrollbar{width:0}
+    </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div id="today-widget" class="today-widget" onclick="switchPage('home')">
+    <span class="tw-emoji" id="tw-emoji">🌙</span>
+    <div>
+        <div class="tw-label" id="tw-label">Ночная смена</div>
+        <div class="tw-date" id="tw-date"></div>
+    </div>
+</div>
+<div id="pwa-hint">📲 Нажми «Поделиться» → На экран «Домой»</div>
+<button id="install-btn">📲 Установить график</button>
+
+<!-- МОДАЛКА ДНЯ -->
+<div class="modal-overlay" id="day-modal">
+<div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><h2 id="modal-title"></h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div id="modal-shift-badge" class="modal-shift-badge"></div>
+    <div id="modal-info"></div>
+    <div style="margin-top:16px">
+        <label class="user-label" style="display:block;margin-bottom:8px">🔄 Изменить тип дня</label>
+        <div class="type-selector" id="type-selector">
+            <div class="type-chip" data-type="night" onclick="selectDayType('night')">🌙 Ночь</div>
+            <div class="type-chip" data-type="day-sh" onclick="selectDayType('day-sh')">☀️ День</div>
+            <div class="type-chip" data-type="off" onclick="selectDayType('off')">😊 Выходной</div>
+            <div class="type-chip" data-type="vacation" onclick="selectDayType('vacation')">🏖️ Отпуск</div>
+            <div class="type-chip" data-type="extra" onclick="selectDayType('extra')">💼 Подработка</div>
+            <div class="type-chip" data-type="sick" onclick="selectDayType('sick')">🤒 Больничный</div>
+            <div class="type-chip" data-type="reset" onclick="selectDayType('reset')">↩️ Авто</div>
+        </div>
+    </div>
+    <div class="note-section" style="margin-top:12px">
+        <label class="user-label" style="margin-bottom:8px;display:block">📝 Заметка</label>
+        <textarea class="note-input" id="note-input" rows="3" placeholder="Заметка на этот день…"></textarea>
+    </div>
+    <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeModal()">Отмена</button>
+        <button class="modal-btn primary" onclick="saveDay()">💾 Сохранить</button>
+    </div>
+</div>
+</div>
+
+<!-- МОДАЛКА ПЕРИОДА -->
+<div class="modal-overlay" id="period-modal">
+<div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><h2 id="period-modal-title">Добавить период</h2><button class="modal-close" onclick="closePeriodModal()">✕</button></div>
+    <div class="form-group">
+        <label class="form-label">Дата начала</label>
+        <button class="date-start-btn" style="width:100%;margin-top:6px" onclick="openDatePicker('period-start')">
+            <span>📆</span> <span id="period-start-label">Выберите дату</span>
+        </button>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Дата окончания</label>
+        <button class="date-start-btn" style="width:100%;margin-top:6px" onclick="openDatePicker('period-end')">
+            <span>📆</span> <span id="period-end-label">Выберите дату</span>
+        </button>
+    </div>
+    <div class="modal-actions" style="margin-top:20px">
+        <button class="modal-btn secondary" onclick="closePeriodModal()">Отмена</button>
+        <button class="modal-btn primary" id="period-save-btn" onclick="savePeriod()">✅ Добавить</button>
+    </div>
+</div>
+</div>
+
+<!-- МОДАЛКА ВЫБОРА ДАТЫ (общая) -->
+<div class="modal-overlay" id="startdate-modal">
+<div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><h2 id="dp-modal-title">📅 Выбор даты</h2><button class="modal-close" onclick="closeStartDateModal()">✕</button></div>
+    <div class="dp-nav">
+        <button onclick="changeDpMonth(-1)">◀</button>
+        <div class="dp-nav-title" id="dp-title">Январь 2026</div>
+        <button onclick="changeDpMonth(1)">▶</button>
+    </div>
+    <div class="dp-grid" id="dp-grid"></div>
+    <div class="modal-actions" style="margin-top:20px">
+        <button class="modal-btn secondary" onclick="closeStartDateModal()">Отмена</button>
+        <button class="modal-btn primary" onclick="confirmDatePicker()">✅ Выбрать</button>
+    </div>
+</div>
+</div>
+
+<div class="container">
+
+<!-- ГЛАВНАЯ -->
+<div class="page active" id="page-home">
+    <div style="margin:20px 0 12px">
+        <div class="bento-card">
+            <div class="user-label">Сменный график 2026–2030</div>
+            <h1 id="header-name">Ваше имя</h1>
+        </div>
+    </div>
+    <div class="today-hero" id="today-hero">
+        <span class="today-emoji" id="today-emoji">🌙</span>
+        <div class="today-type" id="today-type">Ночная смена</div>
+        <div class="today-date" id="today-date"></div>
+        <div class="today-next" id="today-next"></div>
+    </div>
+    <div class="widgets-grid">
+        <div class="widget-card" onclick="switchPage('calendar')"><div class="widget-icon" id="vac-emoji">🗓️</div><div class="widget-value" id="vac-count">--</div><div class="widget-label" id="vac-label">До отпуска</div></div>
+        <div class="widget-card" onclick="switchPage('stats')"><div class="widget-icon">📊</div><div class="widget-value" id="hours-month">--</div><div class="widget-label">Часов в месяце</div></div>
+        <div class="widget-card" onclick="switchPage('stats')"><div class="widget-icon">🌙</div><div class="widget-value" id="nights-left">--</div><div class="widget-label">Ночных осталось</div></div>
+        <div class="widget-card" onclick="switchPage('stats')"><div class="widget-icon">📆</div><div class="widget-value" id="days-left-year">--</div><div class="widget-label">До конца года</div></div>
+    </div>
+    <div class="stat-card"><div class="user-label" style="margin-bottom:12px">Ближайшие 7 дней</div><div id="upcoming-shifts"></div></div>
+</div>
+
+<!-- КАЛЕНДАРЬ -->
+<div class="page" id="page-calendar">
+    <h1 style="margin:20px 0">📅 Календарь</h1>
+    <div class="year-selector">
+        <button class="year-btn" id="year-prev" onclick="changeYear(-1)">◀</button>
+        <div class="year-display" id="year-display">2026</div>
+        <button class="year-btn" id="year-next" onclick="changeYear(1)">▶</button>
+    </div>
+    <div class="legend-mini">
+        <div class="l-item"><span class="l-dot" style="background:var(--night)"></span>Ночь</div>
+        <div class="l-item"><span class="l-dot" style="background:var(--day)"></span>День</div>
+        <div class="l-item"><span class="l-dot" style="background:var(--vac)"></span>Отпуск</div>
+        <div class="l-item"><span class="l-dot" style="background:var(--extra)"></span>Подр</div>
+        <div class="l-item"><span class="l-dot" style="background:var(--sick)"></span>Бол</div>
+        <div class="l-item"><span class="l-dot" style="color:var(--text-dim)">●</span>Вых</div>
+    </div>
+    <div id="calendar-mount"></div>
+</div>
+
+<!-- СТАТИСТИКА -->
+<div class="page" id="page-stats">
+    <h1 style="margin:20px 0">📊 Статистика</h1>
+    <div class="stat-card"><div class="user-label">Статистика за <span id="stats-year-label">2026</span></div><div id="year-stats"></div></div>
+    <div class="stat-card"><div class="user-label">Прогресс года</div>
+        <div style="text-align:center;margin:20px 0">
+            <svg class="progress-ring" width="160" height="160">
+                <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="10"/>
+                <circle id="progress-circle" cx="80" cy="80" r="70" fill="none" stroke="url(#grad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440" transform="rotate(-90 80 80)"/>
+                <defs><linearGradient id="grad"><stop offset="0%" stop-color="#7C3AED"/><stop offset="100%" stop-color="#0EA5E9"/></linearGradient></defs>
+                <text x="80" y="75" text-anchor="middle" fill="white" font-weight="800" font-size="24" font-family="Plus Jakarta Sans" id="progress-text">0%</text>
+                <text x="80" y="95" text-anchor="middle" fill="#666" font-size="10" font-family="Plus Jakarta Sans">ПРОЙДЕНО</text>
+            </svg>
+        </div>
+    </div>
+    <div class="stat-card"><div class="user-label">Помесячная разбивка</div><div id="monthly-stats"></div></div>
+</div>
+
+<!-- НАСТРОЙКИ -->
+<div class="page" id="page-settings">
+    <h1 style="margin:20px 0">⚙️ Настройки</h1>
+
+    <div class="settings-group">
+        <div class="settings-title">Профиль</div>
+        <div class="stat-card" style="border-radius:20px">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profile-avatar">👤</div>
+                <div><div class="profile-header-name" id="profile-display-name">Ваше имя</div><div class="profile-header-role">Сменный работник</div></div>
+            </div>
+            <div class="profile-form">
+                <div class="form-group"><label class="form-label">Имя</label><input type="text" class="name-input" id="input-firstname" placeholder="Имя" maxlength="30"></div>
+                <div class="form-group"><label class="form-label">Фамилия</label><input type="text" class="name-input" id="input-lastname" placeholder="Фамилия" maxlength="30"></div>
+                <button class="save-name-btn" onclick="saveName()">✅ Сохранить имя</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Настройка смен -->
+    <div class="settings-group">
+        <div class="settings-title">⏰ Цикл смен</div>
+        <div class="shift-config-card">
+            <div class="user-label" style="margin-bottom:8px">Настройте свой график</div>
+            <div class="shift-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+                <div class="shift-row-label">📅 Дата начала цикла</div>
+                <button class="date-start-btn" id="cfg-start-btn" onclick="openStartDateModal()">
+                    <span>📆</span> <span id="cfg-start-label">1 января 2026</span>
+                </button>
+            </div>
+            <div class="shift-row">
+                <div class="shift-row-label">🌙 Ночных подряд</div>
+                <input type="number" class="shift-row-input" id="cfg-night" min="0" max="56" value="0" onchange="saveShiftConfig()">
+            </div>
+            <div class="shift-row">
+                <div class="shift-row-label">😊 Выходных после ночных</div>
+                <input type="number" class="shift-row-input" id="cfg-off1" min="0" max="56" value="0" onchange="saveShiftConfig()">
+            </div>
+            <div class="shift-row">
+                <div class="shift-row-label">☀️ Дневных подряд</div>
+                <input type="number" class="shift-row-input" id="cfg-day" min="0" max="56" value="0" onchange="saveShiftConfig()">
+            </div>
+            <div class="shift-row">
+                <div class="shift-row-label">😊 Выходных после дневных</div>
+                <input type="number" class="shift-row-input" id="cfg-off2" min="0" max="56" value="0" onchange="saveShiftConfig()">
+            </div>
+            <div class="shift-row">
+                <div class="shift-row-label">⏱️ Часов в смене</div>
+                <input type="number" class="shift-row-input" id="cfg-hours" min="1" max="24" value="12" onchange="saveShiftConfig()">
+            </div>
+            <div class="shift-preview">
+                <div class="shift-preview-title">Предпросмотр цикла (<span id="cycle-len">0</span> дн.)</div>
+                <div class="shift-preview-bar" id="shift-preview-bar"></div>
+            </div>
+            <button class="save-name-btn" style="margin-top:16px;background:rgba(255,255,255,.08)" onclick="resetShiftConfig()">↩️ Сбросить по умолчанию</button>
+        </div>
+    </div>
+
+    <div class="settings-group">
+        <div class="settings-title">🏖️ Отпуска</div>
+        <div id="vacation-list" class="custom-list"></div>
+        <button class="add-period-btn" onclick="openPeriodModal('vacation')">+ Добавить отпуск</button>
+    </div>
+    <div class="settings-group">
+        <div class="settings-title">💼 Подработки</div>
+        <div id="extra-list" class="custom-list"></div>
+        <button class="add-period-btn" onclick="openPeriodModal('extra')">+ Добавить подработку</button>
+    </div>
+    <div class="settings-group">
+        <div class="settings-title">🤒 Больничные</div>
+        <div id="sick-list" class="custom-list"></div>
+        <button class="add-period-btn" onclick="openPeriodModal('sick')">+ Добавить больничный</button>
+    </div>
+
+    <div class="settings-group">
+        <div class="settings-title">Тема</div>
+        <div class="settings-item" onclick="toggleTheme()"><div class="settings-left"><span class="settings-icon" id="theme-icon">🌙</span><div class="settings-text"><div class="settings-name" id="theme-name">Тёмная тема</div><div class="settings-desc">День / Ночь</div></div></div><button class="toggle" id="toggle-theme"></button></div>
+    </div>
+
+    <div class="settings-group">
+        <div class="settings-title">Уведомления</div>
+        <div class="settings-item" onclick="toggleSetting('notif-shift')"><div class="settings-left"><span class="settings-icon">🔔</span><div class="settings-text"><div class="settings-name">Напоминание о смене</div><div class="settings-desc">За 1 час до начала</div></div></div><button class="toggle" id="toggle-notif-shift"></button></div>
+        <div class="settings-item" onclick="toggleSetting('notif-vac')"><div class="settings-left"><span class="settings-icon">🏖️</span><div class="settings-text"><div class="settings-name">Отпуск</div><div class="settings-desc">За 3 дня до начала</div></div></div><button class="toggle" id="toggle-notif-vac"></button></div>
+        <div class="settings-item" onclick="toggleSetting('notif-note')"><div class="settings-left"><span class="settings-icon">📝</span><div class="settings-text"><div class="settings-name">Заметки</div><div class="settings-desc">В день с заметкой утром</div></div></div><button class="toggle" id="toggle-notif-note"></button></div>
+        <div class="settings-item" onclick="toggleSetting('notif-sound')"><div class="settings-left"><span class="settings-icon">🔊</span><div class="settings-text"><div class="settings-name">Звук уведомлений</div><div class="settings-desc">Сигнал при уведомлении</div></div></div><button class="toggle" id="toggle-notif-sound"></button></div>
+    </div>
+
+    <div class="settings-group">
+        <div class="settings-title">Заметки</div>
+        <div id="all-notes" class="notes-list"></div>
+        <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:.85rem" id="no-notes">Нет заметок</div>
+    </div>
+
+    <div style="text-align:center;padding:30px 0;color:var(--text-dim);font-size:.75rem">Work Shift Elite v3.0 · 2026–2030<br>Made with 💜</div>
+</div>
+</div>
+
+<nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchPage('home')" id="nav-home"><span class="nav-icon">🏠</span>Главная</button>
+    <button class="nav-item" onclick="switchPage('calendar')" id="nav-calendar"><span class="nav-icon">📅</span>Календарь</button>
+    <button class="nav-item" onclick="switchPage('stats')" id="nav-stats"><span class="nav-icon">📊</span>Стат</button>
+    <button class="nav-item" onclick="switchPage('settings')" id="nav-settings"><span class="nav-icon">⚙️</span>Ещё</button>
+</nav>
+
+<script>
+const YEAR_MIN=2026,YEAR_MAX=2030;
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const DEFAULT_FIRST='',DEFAULT_LAST='';
+const MONTHS_RU=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const DAYS_SHORT=['пн','вт','ср','чт','пт','сб','вс'];
+const MONTHS_GEN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const DOW_FULL=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+
+let currentCalYear=Math.max(YEAR_MIN,Math.min(YEAR_MAX,TODAY.getFullYear()));
+
+let notes=JSON.parse(localStorage.getItem('ws-notes')||'{}');
+let settings=JSON.parse(localStorage.getItem('ws-settings')||'{"notif-shift":false,"notif-vac":false,"notif-note":false,"notif-sound":true,"theme":"dark"}');
+if(!settings.theme)settings.theme='dark';
+if(settings['notif-sound']===undefined)settings['notif-sound']=true;
+let userProfile=JSON.parse(localStorage.getItem('ws-profile')||'{"firstName":"","lastName":""}');
+let vacations=JSON.parse(localStorage.getItem('ws-vacations')||'[]');
+let extras=JSON.parse(localStorage.getItem('ws-extras')||'[]');
+let sicks=JSON.parse(localStorage.getItem('ws-sicks')||'[]');
+let dayOverrides=JSON.parse(localStorage.getItem('ws-overrides')||'{}');
+
+// Конфигурация смен
+const DEFAULT_SHIFT={startDate:'2026-01-01',nightDays:0,off1Days:0,dayDays:0,off2Days:0,hoursPerShift:12};
+let shiftCfg=JSON.parse(localStorage.getItem('ws-shift-cfg')||JSON.stringify(DEFAULT_SHIFT));
+if(!shiftCfg.startDate)shiftCfg.startDate=DEFAULT_SHIFT.startDate;
+
+function saveSt(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function parseD(s){const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+function fmtD(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function dateKey(d){return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`}
+function diffDC(a,b){return Math.round((b-a)/864e5)+1}
+function getCycleLen(){return shiftCfg.nightDays+shiftCfg.off1Days+shiftCfg.dayDays+shiftCfg.off2Days}
+
+function getBaseShift(date){
+    const total=getCycleLen();
+    if(total<=0)return'off';
+    const start=parseD(shiftCfg.startDate||'2026-01-01');
+    const diff=Math.round((date-start)/864e5);
+    const cycle=((diff%total)+total)%total;
+    const n=shiftCfg.nightDays,o1=n+shiftCfg.off1Days,d=o1+shiftCfg.dayDays;
+    if(cycle<n)return'night';
+    if(cycle<o1)return'off';
+    if(cycle<d)return'day-sh';
+    return'off';
+}
+
+function getShiftType(date){
+    const dk=dateKey(date);
+    if(dayOverrides[dk]&&dayOverrides[dk]!=='reset')return dayOverrides[dk];
+    if(dayOverrides[dk]==='reset')return getBaseShift(date);
+    const ds=fmtD(date);
+    if(sicks.some(s=>ds>=s.start&&ds<=s.end))return'sick';
+    if(extras.some(e=>ds>=e.start&&ds<=e.end))return'extra';
+    if(vacations.some(v=>ds>=v.start&&ds<=v.end))return'vacation';
+    return getBaseShift(date);
+}
+
+function getShiftInfo(type){
+    const h=shiftCfg.hoursPerShift;
+    switch(type){
+        case'night':return{emoji:'🌙',label:'Ночная смена',cls:'night-shift',color:'#7C3AED',hours:h};
+        case'day-sh':return{emoji:'☀️',label:'Дневная смена',cls:'day-shift',color:'#0EA5E9',hours:h};
+        case'vacation':return{emoji:'🏖️',label:'Отпуск',cls:'vacation-shift',color:'#F59E0B',hours:0};
+        case'extra':return{emoji:'💼',label:'Подработка',cls:'extra-shift',color:'#22C55E',hours:h};
+        case'sick':return{emoji:'🤒',label:'Больничный',cls:'sick-shift',color:'#EF4444',hours:0};
+        default:return{emoji:'😊',label:'Выходной',cls:'off-shift',color:'#333',hours:0};
+    }
+}
+
+// Конфигурация смен — UI
+function updateStartDateLabel(){
+    const s=parseD(shiftCfg.startDate||'2026-01-01');
+    document.getElementById('cfg-start-label').textContent=`${s.getDate()} ${MONTHS_GEN[s.getMonth()]} ${s.getFullYear()}`;
+}
+
+function loadShiftConfig(){
+    updateStartDateLabel();
+    document.getElementById('cfg-night').value=shiftCfg.nightDays;
+    document.getElementById('cfg-off1').value=shiftCfg.off1Days;
+    document.getElementById('cfg-day').value=shiftCfg.dayDays;
+    document.getElementById('cfg-off2').value=shiftCfg.off2Days;
+    document.getElementById('cfg-hours').value=shiftCfg.hoursPerShift;
+    renderShiftPreview();
+}
+
+function saveShiftConfig(){
+    shiftCfg.nightDays=Math.max(0,+document.getElementById('cfg-night').value||0);
+    shiftCfg.off1Days=Math.max(0,+document.getElementById('cfg-off1').value||0);
+    shiftCfg.dayDays=Math.max(0,+document.getElementById('cfg-day').value||0);
+    shiftCfg.off2Days=Math.max(0,+document.getElementById('cfg-off2').value||0);
+    shiftCfg.hoursPerShift=Math.max(1,Math.min(24,+document.getElementById('cfg-hours').value||12));
+    saveSt('ws-shift-cfg',shiftCfg);
+    renderShiftPreview();
+    refreshAll();
+    showToast('⏰ График обновлён','info');
+}
+
+// Кастомный календарь выбора даты (общий)
+let dpYear=2026,dpMonth=0,dpSelected=null,dpMode='cycle';
+let periodStartVal='',periodEndVal='';
+
+function openStartDateModal(){openDatePicker('cycle')}
+
+function openDatePicker(mode){
+    dpMode=mode;
+    const titles={'cycle':'📅 Дата начала цикла','period-start':'📅 Дата начала','period-end':'📅 Дата окончания'};
+    document.getElementById('dp-modal-title').textContent=titles[mode]||'📅 Выбор даты';
+    let init;
+    if(mode==='cycle')init=parseD(shiftCfg.startDate||'2026-01-01');
+    else if(mode==='period-start'&&periodStartVal)init=parseD(periodStartVal);
+    else if(mode==='period-end'&&periodEndVal)init=parseD(periodEndVal);
+    else if(mode==='period-end'&&periodStartVal)init=parseD(periodStartVal);
+    else init=new Date(TODAY);
+    dpYear=init.getFullYear();dpMonth=init.getMonth();
+    dpSelected=(mode==='cycle')?fmtD(init):(mode==='period-start'?periodStartVal:periodEndVal)||fmtD(init);
+    renderDpCalendar();
+    document.getElementById('startdate-modal').classList.add('active');
+}
+
+function closeStartDateModal(){document.getElementById('startdate-modal').classList.remove('active')}
+document.getElementById('startdate-modal').addEventListener('click',function(e){if(e.target===this)closeStartDateModal()});
+
+function changeDpMonth(d){
+    dpMonth+=d;
+    if(dpMonth>11){dpMonth=0;dpYear++}
+    if(dpMonth<0){dpMonth=11;dpYear--}
+    if(dpYear<YEAR_MIN){dpYear=YEAR_MIN;dpMonth=0}
+    if(dpYear>YEAR_MAX){dpYear=YEAR_MAX;dpMonth=11}
+    renderDpCalendar();
+}
+
+function renderDpCalendar(){
+    document.getElementById('dp-title').textContent=`${MONTHS_RU[dpMonth]} ${dpYear}`;
+    const grid=document.getElementById('dp-grid');
+    let html=DAYS_SHORT.map(d=>`<div class="dp-day-h">${d}</div>`).join('');
+    const first=new Date(dpYear,dpMonth,1);
+    const dim=new Date(dpYear,dpMonth+1,0).getDate();
+    const off=first.getDay()===0?6:first.getDay()-1;
+    for(let i=0;i<off;i++)html+='<div></div>';
+    for(let d=1;d<=dim;d++){
+        const key=`${dpYear}-${String(dpMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const sel=key===dpSelected?'selected':'';
+        html+=`<div class="dp-cell ${sel}" onclick="selectDpDay('${key}')">${d}</div>`;
+    }
+    grid.innerHTML=html;
+}
+
+function selectDpDay(key){dpSelected=key;renderDpCalendar()}
+
+function formatDateLabel(s){
+    if(!s)return'Выберите дату';
+    const d=parseD(s);
+    return`${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function confirmDatePicker(){
+    if(!dpSelected)return;
+    if(dpMode==='cycle'){
+        shiftCfg.startDate=dpSelected;
+        saveSt('ws-shift-cfg',shiftCfg);
+        updateStartDateLabel();
+        closeStartDateModal();
+        refreshAll();
+        showToast('📅 Дата начала обновлена','info');
+    } else if(dpMode==='period-start'){
+        periodStartVal=dpSelected;
+        document.getElementById('period-start-label').textContent=formatDateLabel(dpSelected);
+        closeStartDateModal();
+    } else if(dpMode==='period-end'){
+        periodEndVal=dpSelected;
+        document.getElementById('period-end-label').textContent=formatDateLabel(dpSelected);
+        closeStartDateModal();
+    }
+}
+
+function resetShiftConfig(){
+    shiftCfg={...DEFAULT_SHIFT};
+    saveSt('ws-shift-cfg',shiftCfg);
+    loadShiftConfig();
+    refreshAll();
+    showToast('↩️ График сброшен','info');
+}
+
+function renderShiftPreview(){
+    const total=getCycleLen();
+    document.getElementById('cycle-len').textContent=total||'—';
+    const bar=document.getElementById('shift-preview-bar');
+    if(total<=0){bar.innerHTML='<span style="color:var(--text-dim);font-size:.8rem">Настройте хотя бы один период</span>';return;}
+    let html='';
+    const colors={night:'#7C3AED',off:'#222','day-sh':'#0EA5E9'};
+    for(let i=0;i<total&&i<120;i++){
+        let c;
+        if(i<shiftCfg.nightDays)c=colors.night;
+        else if(i<shiftCfg.nightDays+shiftCfg.off1Days)c=colors.off;
+        else if(i<shiftCfg.nightDays+shiftCfg.off1Days+shiftCfg.dayDays)c=colors['day-sh'];
+        else c=colors.off;
+        html+=`<div class="spb-day" style="background:${c}" title="День ${i+1}"></div>`;
+    }
+    bar.innerHTML=html;
+}
+
+// НАВИГАЦИЯ
+const pages=['home','calendar','stats','settings'];
+function switchPage(page){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById(`page-${page}`).classList.add('active');
+    document.getElementById(`nav-${page}`).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(page==='calendar')renderCalendar();
+    if(page==='stats')renderStats();
+    if(page==='settings'){renderNotesList();loadProfileForm();renderPeriodLists();loadShiftConfig();}
+}
+
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),2500)}
+
+function refreshAll(){renderToday();updateWidgets();renderCalendar();}
+
+// СЕГОДНЯ
+function renderToday(){
+    const type=getShiftType(TODAY),info=getShiftInfo(type);
+    document.getElementById('today-hero').className=`today-hero ${info.cls}`;
+    document.getElementById('today-emoji').textContent=info.emoji;
+    document.getElementById('today-type').textContent=info.label;
+    const dateStr=`${DOW_FULL[TODAY.getDay()]}, ${TODAY.getDate()} ${MONTHS_GEN[TODAY.getMonth()]} ${TODAY.getFullYear()}`;
+    document.getElementById('today-date').textContent=dateStr;
+    // Виджет «Сегодня»
+    document.getElementById('tw-emoji').textContent=info.emoji;
+    document.getElementById('tw-label').textContent=info.label;
+    document.getElementById('tw-date').textContent=`${TODAY.getDate()} ${MONTHS_GEN[TODAY.getMonth()].slice(0,3)}`;
+    let nd=new Date(TODAY),ni;
+    for(let i=1;i<=90;i++){nd=new Date(TODAY.getTime()+i*864e5);const nt=getShiftType(nd);if(nt!==type&&nt!=='off'){ni=getShiftInfo(nt);break;}}
+    document.getElementById('today-next').innerHTML=ni?`Следующее: <strong>${ni.emoji} ${ni.label}</strong> — ${nd.getDate()} ${MONTHS_GEN[nd.getMonth()]}`:'';
+    let u='';
+    for(let i=0;i<7;i++){const d=new Date(TODAY.getTime()+i*864e5),st=getShiftType(d),si=getShiftInfo(st),isT=i===0;
+    u+=`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;${i<6?'border-bottom:1px solid var(--border);':''}${isT?'font-weight:700;':'opacity:.7;'}">
+        <span style="font-size:1.2rem">${si.emoji}</span>
+        <span style="flex:1">${isT?'Сегодня':DAYS_SHORT[(d.getDay()+6)%7].toUpperCase()+', '+d.getDate()+' '+MONTHS_GEN[d.getMonth()].slice(0,3)}</span>
+        <span style="font-size:.8rem;color:${si.color};font-weight:700">${si.label}</span></div>`;}
+    document.getElementById('upcoming-shifts').innerHTML=u;
+}
+
+function updateWidgets(){
+    const ts=fmtD(TODAY),av=[...vacations].sort((a,b)=>a.start.localeCompare(b.start));
+    const nv=av.find(v=>v.start>ts),cv=av.find(v=>ts>=v.start&&ts<=v.end);
+    const ce=document.getElementById('vac-count'),le=document.getElementById('vac-label'),ee=document.getElementById('vac-emoji');
+    if(cv){le.textContent='В отпуске!';ce.textContent=diffDC(TODAY,parseD(cv.end))+' дн.';ee.textContent='🏖️';}
+    else if(nv){ce.textContent=Math.ceil((parseD(nv.start)-TODAY)/864e5)+' дн.';ee.textContent='🗓️';le.textContent='До отпуска';}
+    else{ce.textContent='—';le.textContent='Нет отпусков';}
+    const cy=TODAY.getFullYear(),cm=TODAY.getMonth(),dim=new Date(cy,cm+1,0).getDate();
+    let hm=0;for(let d=1;d<=dim;d++)hm+=getShiftInfo(getShiftType(new Date(cy,cm,d))).hours;
+    document.getElementById('hours-month').textContent=hm+'ч';
+    let nl=0;const cd=new Date(TODAY),ye=new Date(cy,11,31);
+    while(cd<=ye){if(getShiftType(cd)==='night')nl++;cd.setDate(cd.getDate()+1);}
+    document.getElementById('nights-left').textContent=nl;
+    document.getElementById('days-left-year').textContent=Math.max(0,Math.ceil((ye-TODAY)/864e5));
+}
+
+function changeYear(d){currentCalYear=Math.max(YEAR_MIN,Math.min(YEAR_MAX,currentCalYear+d));renderCalendar();}
+
+function renderCalendar(){
+    const m=document.getElementById('calendar-mount');m.innerHTML='';
+    document.getElementById('year-display').textContent=currentCalYear;
+    document.getElementById('year-prev').disabled=currentCalYear<=YEAR_MIN;
+    document.getElementById('year-next').disabled=currentCalYear>=YEAR_MAX;
+    MONTHS_RU.forEach((name,i)=>{
+        const isPast=new Date(currentCalYear,i+1,0)<TODAY,isCur=TODAY.getFullYear()===currentCalYear&&TODAY.getMonth()===i;
+        let nC=0,dC=0,vC=0,eC=0,sC=0;const dim=new Date(currentCalYear,i+1,0).getDate();
+        for(let d=1;d<=dim;d++){const t=getShiftType(new Date(currentCalYear,i,d));if(t==='night')nC++;if(t==='day-sh')dC++;if(t==='vacation')vC++;if(t==='extra')eC++;if(t==='sick')sC++;}
+        const box=document.createElement('div');box.id=`m-${currentCalYear}-${i}`;box.className=`month-box ${isPast?'collapsed':''}`;
+        let h=`<div class="month-trigger" onclick="this.parentElement.classList.toggle('collapsed')"><div><span class="month-title">${name}</span><div class="month-badge">
+            ${nC?`<span style="color:#7C3AED">🌙${nC}</span>`:''}${dC?`<span style="color:#0EA5E9">☀️${dC}</span>`:''}
+            ${vC?`<span style="color:#F59E0B">🏖️${vC}</span>`:''}${eC?`<span style="color:#22C55E">💼${eC}</span>`:''}${sC?`<span style="color:#EF4444">🤒${sC}</span>`:''}</div></div>
+            <span style="opacity:.3;font-size:.8rem">${isPast?'АРХИВ':isCur?'●':'▼'}</span></div>
+            <div class="month-content"><div class="calendar-grid">${DAYS_SHORT.map(d=>`<div class="w-day">${d}</div>`).join('')}`;
+        const f=new Date(currentCalYear,i,1).getDay(),off=f===0?6:f-1;
+        for(let e=0;e<off;e++)h+='<div></div>';
+        for(let d=1;d<=dim;d++){
+            const cur=new Date(currentCalYear,i,d),type=getShiftType(cur),isT=cur.getTime()===TODAY.getTime();
+            const dk=dateKey(cur),hasN=notes[dk],hasO=dayOverrides[dk];
+            h+=`<div class="d-cell ${type==='day-sh'?'day-sh':type} ${isT?'today-cell':''}" onclick="openModal(${currentCalYear},${i},${d})">${d}${isT?'<div class="today-mark"></div>':''}${hasN?'<div class="note-dot"></div>':''}${hasO?'<div style="position:absolute;top:3px;left:3px;width:4px;height:4px;background:var(--accent);border-radius:50%"></div>':''}</div>`;}
+        box.innerHTML=h+'</div></div>';m.appendChild(box);
+        if(isCur)setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'center'}),300);
+    });
+}
+
+// МОДАЛКА ДНЯ
+let selectedDate=null,selectedDayType=null;
+function openModal(y,mo,d){
+    selectedDate=new Date(y,mo,d);
+    const type=getShiftType(selectedDate),info=getShiftInfo(type),dk=dateKey(selectedDate);
+    document.getElementById('modal-title').textContent=`${d} ${MONTHS_GEN[mo]} ${y}`;
+    const b=document.getElementById('modal-shift-badge');b.textContent=`${info.emoji} ${info.label}`;b.style.background=`${info.color}22`;b.style.color=info.color;
+    let ih=`<div style="color:var(--text-dim);font-size:.85rem;margin-bottom:6px">${DOW_FULL[selectedDate.getDay()]}</div>`;
+    if(info.hours>0)ih+=`<div style="color:var(--text-dim);font-size:.85rem">⏱️ ${info.hours} часов</div>`;
+    const dd=Math.round((selectedDate-TODAY)/864e5);
+    if(dd>0)ih+=`<div style="color:var(--text-dim);font-size:.85rem;margin-top:4px">📍 Через ${dd} ${pluralDays(dd)}</div>`;
+    else if(dd<0)ih+=`<div style="color:var(--text-dim);font-size:.85rem;margin-top:4px">📍 ${Math.abs(dd)} ${pluralDays(Math.abs(dd))} назад</div>`;
+    else ih+=`<div style="color:var(--success);font-size:.85rem;margin-top:4px;font-weight:700">📍 Сегодня</div>`;
+    if(dayOverrides[dk])ih+=`<div style="color:var(--accent);font-size:.8rem;margin-top:8px;font-weight:600">✏️ Изменён вручную</div>`;
+    const base=getBaseShift(selectedDate),bi=getShiftInfo(base);
+    ih+=`<div style="color:var(--text-dim);font-size:.75rem;margin-top:6px">Авто: ${bi.emoji} ${bi.label}</div>`;
+    document.getElementById('modal-info').innerHTML=ih;
+    document.getElementById('note-input').value=notes[dk]||'';
+    selectedDayType=null;
+    document.querySelectorAll('#type-selector .type-chip').forEach(c=>c.classList.remove('active'));
+    // Подсветить текущий override если есть
+    if(dayOverrides[dk]){
+        const el=document.querySelector(`#type-selector .type-chip[data-type="${dayOverrides[dk]}"]`);
+        if(el)el.classList.add('active');
+        selectedDayType=dayOverrides[dk];
+    }
+    document.getElementById('day-modal').classList.add('active');
+    if(navigator.vibrate)navigator.vibrate(10);
+}
+
+function selectDayType(type){
+    if(selectedDayType===type){selectedDayType=null;document.querySelectorAll('#type-selector .type-chip').forEach(c=>c.classList.remove('active'));return;}
+    selectedDayType=type;
+    document.querySelectorAll('#type-selector .type-chip').forEach(c=>c.classList.toggle('active',c.dataset.type===type));
+}
+
+function saveDay(){
+    if(!selectedDate)return;
+    const dk=dateKey(selectedDate),text=document.getElementById('note-input').value.trim();
+    if(text)notes[dk]=text;else delete notes[dk];
+    saveSt('ws-notes',notes);
+    if(selectedDayType){
+        if(selectedDayType==='reset')delete dayOverrides[dk];
+        else dayOverrides[dk]=selectedDayType;
+        saveSt('ws-overrides',dayOverrides);
+    }
+    showToast('✅ Сохранено');closeModal();refreshAll();
+}
+
+function closeModal(){document.getElementById('day-modal').classList.remove('active');selectedDate=null;selectedDayType=null;}
+document.getElementById('day-modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+// ПЕРИОДЫ
+let periodType='vacation';
+function openPeriodModal(t){
+    periodType=t;
+    const titles={vacation:'🏖️ Добавить отпуск',extra:'💼 Добавить подработку',sick:'🤒 Добавить больничный'};
+    const btns={vacation:'🏖️ Добавить',extra:'💼 Добавить',sick:'🤒 Добавить'};
+    document.getElementById('period-modal-title').textContent=titles[t]||'Добавить период';
+    document.getElementById('period-save-btn').textContent=btns[t]||'✅ Добавить';
+    periodStartVal='';periodEndVal='';
+    document.getElementById('period-start-label').textContent='Выберите дату';
+    document.getElementById('period-end-label').textContent='Выберите дату';
+    document.getElementById('period-modal').classList.add('active');
+}
+function closePeriodModal(){document.getElementById('period-modal').classList.remove('active')}
+document.getElementById('period-modal').addEventListener('click',function(e){if(e.target===this)closePeriodModal()});
+
+function savePeriod(){
+    const s=periodStartVal,e=periodEndVal;
+    if(!s||!e){showToast('❌ Выберите даты','error');return}
+    if(s>e){showToast('❌ Начало позже конца','error');return}
+    const sy=+s.split('-')[0],ey=+e.split('-')[0];
+    if(sy<YEAR_MIN||ey>YEAR_MAX){showToast(`❌ ${YEAR_MIN}–${YEAR_MAX}`,'error');return}
+    if(periodType==='vacation'){vacations.push({start:s,end:e});saveSt('ws-vacations',vacations);showToast('🏖️ Отпуск добавлен');}
+    else if(periodType==='sick'){sicks.push({start:s,end:e});saveSt('ws-sicks',sicks);showToast('🤒 Больничный добавлен');}
+    else{extras.push({start:s,end:e});saveSt('ws-extras',extras);showToast('💼 Подработка добавлена');}
+    closePeriodModal();renderPeriodLists();refreshAll();
+}
+function deleteVacation(i){vacations.splice(i,1);saveSt('ws-vacations',vacations);renderPeriodLists();refreshAll();showToast('🗑️ Удалено','info')}
+function deleteExtra(i){extras.splice(i,1);saveSt('ws-extras',extras);renderPeriodLists();refreshAll();showToast('🗑️ Удалено','info')}
+function deleteSick(i){sicks.splice(i,1);saveSt('ws-sicks',sicks);renderPeriodLists();refreshAll();showToast('🗑️ Удалено','info')}
+
+function renderPeriodLists(){
+    const vl=document.getElementById('vacation-list');
+    vl.innerHTML=vacations.length?vacations.map((v,i)=>{const s=parseD(v.start),e=parseD(v.end),d=diffDC(s,e);
+    return`<div class="custom-item"><div class="custom-item-info"><span class="custom-item-icon">🏖️</span><div><div class="custom-item-dates">${s.getDate()} ${MONTHS_GEN[s.getMonth()]} ${s.getFullYear()} — ${e.getDate()} ${MONTHS_GEN[e.getMonth()]} ${e.getFullYear()}</div><div class="custom-item-days">${d} ${pluralDays(d)}</div></div></div><button class="custom-item-del" onclick="deleteVacation(${i})">✕</button></div>`}).join(''):`<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:.85rem">Нет отпусков</div>`;
+    const el=document.getElementById('extra-list');
+    el.innerHTML=extras.length?extras.map((v,i)=>{const s=parseD(v.start),e=parseD(v.end),d=diffDC(s,e);
+    return`<div class="custom-item"><div class="custom-item-info"><span class="custom-item-icon">💼</span><div><div class="custom-item-dates">${s.getDate()} ${MONTHS_GEN[s.getMonth()]} ${s.getFullYear()} — ${e.getDate()} ${MONTHS_GEN[e.getMonth()]} ${e.getFullYear()}</div><div class="custom-item-days">${d} ${pluralDays(d)}</div></div></div><button class="custom-item-del" onclick="deleteExtra(${i})">✕</button></div>`}).join(''):`<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:.85rem">Нет подработок</div>`;
+    const sl=document.getElementById('sick-list');
+    sl.innerHTML=sicks.length?sicks.map((v,i)=>{const s=parseD(v.start),e=parseD(v.end),d=diffDC(s,e);
+    return`<div class="custom-item"><div class="custom-item-info"><span class="custom-item-icon">🤒</span><div><div class="custom-item-dates">${s.getDate()} ${MONTHS_GEN[s.getMonth()]} ${s.getFullYear()} — ${e.getDate()} ${MONTHS_GEN[e.getMonth()]} ${e.getFullYear()}</div><div class="custom-item-days">${d} ${pluralDays(d)}</div></div></div><button class="custom-item-del" onclick="deleteSick(${i})">✕</button></div>`}).join(''):`<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:.85rem">Нет больничных</div>`;
+}
+
+// СТАТИСТИКА
+function renderStats(){
+    const y=currentCalYear;document.getElementById('stats-year-label').textContent=y;
+    let tN=0,tD=0,tV=0,tE=0,tS=0,tO=0,tH=0,md=[];
+    for(let m=0;m<12;m++){let mN=0,mD=0,mV=0,mE=0,mS=0,mO=0,mH=0;const dim=new Date(y,m+1,0).getDate();
+    for(let d=1;d<=dim;d++){const t=getShiftType(new Date(y,m,d)),h=getShiftInfo(t).hours;mH+=h;tH+=h;
+    if(t==='night'){mN++;tN++}if(t==='day-sh'){mD++;tD++}if(t==='vacation'){mV++;tV++}if(t==='extra'){mE++;tE++}if(t==='sick'){mS++;tS++}if(t==='off'){mO++;tO++}}
+    md.push({nights:mN,days:mD,vac:mV,extra:mE,sick:mS,off:mO,hours:mH})}
+
+    document.getElementById('year-stats').innerHTML=`
+        <div class="stat-row"><span class="stat-label">🌙 Ночные</span><span class="stat-value" style="color:#7C3AED">${tN}</span></div>
+        <div class="stat-row"><span class="stat-label">☀️ Дневные</span><span class="stat-value" style="color:#0EA5E9">${tD}</span></div>
+        <div class="stat-row"><span class="stat-label">🏖️ Отпуск</span><span class="stat-value" style="color:#F59E0B">${tV}</span></div>
+        <div class="stat-row"><span class="stat-label">💼 Подработки</span><span class="stat-value" style="color:#22C55E">${tE}</span></div>
+        <div class="stat-row"><span class="stat-label">🤒 Больничные</span><span class="stat-value" style="color:#EF4444">${tS}</span></div>
+        <div class="stat-row"><span class="stat-label">😊 Выходные</span><span class="stat-value">${tO}</span></div>
+        <div class="stat-row"><span class="stat-label">⏱️ Часов</span><span class="stat-value">${tH}</span></div>
+        <div class="stat-row"><span class="stat-label">✏️ Ручных изменений</span><span class="stat-value">${Object.keys(dayOverrides).length}</span></div>`;
+
+    const doy=Math.floor((TODAY-new Date(y,0,1))/864e5),isL=y%4===0&&(y%100!==0||y%400===0),td=isL?366:365;
+    const yp=y===TODAY.getFullYear()?Math.max(0,Math.min(100,Math.round(doy/td*100))):y<TODAY.getFullYear()?100:0;
+    const circ=2*Math.PI*70;
+    setTimeout(()=>{document.getElementById('progress-circle').style.strokeDashoffset=circ-(circ*yp/100);document.getElementById('progress-text').textContent=yp+'%';},300);
+
+    const maxH=Math.max(...md.map(d=>d.hours))||1;
+    document.getElementById('monthly-stats').innerHTML=md.map((data,i)=>{
+        const ic=TODAY.getFullYear()===y&&TODAY.getMonth()===i;
+        return`<div style="padding:12px 0;${i<11?'border-bottom:1px solid rgba(255,255,255,.05);':''}${ic?'':'opacity:.6'}">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:${ic?800:600};font-size:.9rem">${ic?'▸ ':''}${MONTHS_RU[i]}</span><span style="font-size:.8rem;color:var(--text-dim)">${data.hours}ч</span></div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:${data.hours/maxH*100}%;background:linear-gradient(90deg,#7C3AED,#0EA5E9)"></div></div>
+            <div style="display:flex;gap:10px;margin-top:6px;font-size:.7rem;color:var(--text-dim)"><span>🌙${data.nights}</span><span>☀️${data.days}</span>${data.vac?`<span>🏖️${data.vac}</span>`:''}${data.extra?`<span>💼${data.extra}</span>`:''}${data.sick?`<span>🤒${data.sick}</span>`:''}<span>😊${data.off}</span></div></div>`}).join('');
+}
+
+// ПРОФИЛЬ
+function getFullName(){const n=`${userProfile.firstName||''} ${userProfile.lastName||''}`.trim();return n||'Ваше имя'}
+function getInitials(){return(userProfile.firstName?userProfile.firstName[0].toUpperCase():'')+(userProfile.lastName?userProfile.lastName[0].toUpperCase():'')||'👤'}
+function updateAllNames(){document.getElementById('header-name').textContent=getFullName();document.getElementById('profile-display-name').textContent=getFullName();document.getElementById('profile-avatar').textContent=getInitials()}
+function loadProfileForm(){document.getElementById('input-firstname').value=userProfile.firstName||'';document.getElementById('input-lastname').value=userProfile.lastName||'';updateAllNames()}
+function saveName(){const f=document.getElementById('input-firstname').value.trim(),l=document.getElementById('input-lastname').value.trim();userProfile.firstName=f;userProfile.lastName=l;saveSt('ws-profile',userProfile);updateAllNames();showToast('✅ Сохранено');if(navigator.vibrate)navigator.vibrate(20)}
+
+function toggleSetting(k){
+    settings[k]=!settings[k];
+    saveSt('ws-settings',settings);
+    document.getElementById(`toggle-${k}`).classList.toggle('active',settings[k]);
+    showToast(settings[k]?'🔔 Включено':'🔕 Выключено','info');
+    if(k==='notif-sound'&&settings[k])playNotifSound();
+    if(settings[k]&&k!=='notif-sound'&&'Notification' in window)Notification.requestPermission().then(p=>{if(p==='granted')checkNotifications()});
+}
+function loadSettings(){
+    Object.keys(settings).forEach(k=>{
+        if(k==='theme')return;
+        const el=document.getElementById(`toggle-${k}`);
+        if(el)el.classList.toggle('active',settings[k]);
+    });
+    applyTheme(settings.theme||'dark');
+}
+
+function applyTheme(t){
+    settings.theme=t;
+    document.documentElement.setAttribute('data-theme',t);
+    const isDark=t==='dark';
+    document.getElementById('toggle-theme').classList.toggle('active',!isDark);
+    document.getElementById('theme-icon').textContent=isDark?'🌙':'☀️';
+    document.getElementById('theme-name').textContent=isDark?'Тёмная тема':'Светлая тема';
+    document.querySelector('meta[name="theme-color"]').content=isDark?'#000000':'#f0f2f5';
+}
+function toggleTheme(){
+    const next=settings.theme==='dark'?'light':'dark';
+    applyTheme(next);
+    saveSt('ws-settings',settings);
+    showToast(next==='dark'?'🌙 Тёмная тема':'☀️ Светлая тема','info');
+}
+
+function playNotifSound(){
+    if(!settings['notif-sound'])return;
+    try{
+        const ctx=new (window.AudioContext||window.webkitAudioContext)();
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.frequency.value=880;o.type='sine';
+        g.gain.setValueAtTime(0.15,ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+        o.start(ctx.currentTime);o.stop(ctx.currentTime+0.4);
+        setTimeout(()=>{
+            const o2=ctx.createOscillator(),g2=ctx.createGain();
+            o2.connect(g2);g2.connect(ctx.destination);
+            o2.frequency.value=1175;o2.type='sine';
+            g2.gain.setValueAtTime(0.12,ctx.currentTime);
+            g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);
+            o2.start(ctx.currentTime);o2.stop(ctx.currentTime+0.35);
+        },120);
+    }catch(e){}
+}
+
+function sendNotif(title,body){
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    try{
+        new Notification(title,{body,icon:'icon-192.png',tag:title});
+        playNotifSound();
+    }catch(e){}
+}
+
+function checkNotifications(){
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    const today=fmtD(TODAY);
+    // Отпуск за 3 дня
+    if(settings['notif-vac']){
+        vacations.forEach(v=>{
+            const start=parseD(v.start);
+            const daysLeft=Math.round((start-TODAY)/864e5);
+            if(daysLeft===3)sendNotif('🏖️ Скоро отпуск!',`Через 3 дня начинается отпуск (${v.start} — ${v.end})`);
+            if(daysLeft===0)sendNotif('🏖️ Отпуск начался!','Сегодня первый день отпуска. Хорошего отдыха!');
+        });
+    }
+    // Заметки на сегодня
+    if(settings['notif-note']){
+        const dk=dateKey(TODAY);
+        if(notes[dk])sendNotif('📝 Заметка на сегодня',notes[dk]);
+    }
+    // Смена (упрощённо — при открытии приложения если сегодня рабочий день)
+    if(settings['notif-shift']){
+        const type=getShiftType(TODAY);
+        if(type==='night'||type==='day-sh'){
+            const info=getShiftInfo(type);
+            sendNotif(`${info.emoji} Сегодня ${info.label}`,`Смена ${info.hours} часов. Не забудьте!`);
+        }
+    }
+}
+
+function renderNotesList(){const c=document.getElementById('all-notes'),n=document.getElementById('no-notes'),keys=Object.keys(notes).sort();if(!keys.length){c.innerHTML='';n.style.display='block';return}n.style.display='none';
+c.innerHTML=keys.map(k=>{const p=k.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]),info=getShiftInfo(getShiftType(d));
+return`<div class="note-item"><div><div class="note-date">${info.emoji} ${+p[2]} ${MONTHS_GEN[+p[1]-1]} ${p[0]}</div><div class="note-text">${notes[k]}</div></div><button class="note-delete" onclick="deleteNote('${k}')">✕</button></div>`}).join('')}
+function deleteNote(k){delete notes[k];saveSt('ws-notes',notes);renderNotesList();showToast('🗑️ Удалено','info')}
+
+function pluralDays(n){const l=n%10,lt=n%100;if(lt>=11&&lt<=14)return'дней';if(l===1)return'день';if(l>=2&&l<=4)return'дня';return'дней'}
+
+// PWA
+if('serviceWorker' in navigator)window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
+let deferredPrompt;
+if(/iPhone|iPad/.test(navigator.userAgent)&&!window.navigator.standalone){const h=document.getElementById('pwa-hint');h.style.display='block';setTimeout(()=>{h.style.opacity='0';setTimeout(()=>h.style.display='none',500)},6000)}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-btn').style.display='block'});
+document.getElementById('install-btn').addEventListener('click',async()=>{if(deferredPrompt){deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;if(outcome==='accepted')document.getElementById('install-btn').style.display='none';deferredPrompt=null}});
+
+let touchStartX=0;
+document.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].screenX},{passive:true});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].screenX-touchStartX;if(Math.abs(d)<80)return;const ci=pages.findIndex(p=>document.getElementById(`page-${p}`).classList.contains('active'));if(d>0&&ci>0)switchPage(pages[ci-1]);if(d<0&&ci<pages.length-1)switchPage(pages[ci+1])},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePeriodModal()}const ci=pages.findIndex(p=>document.getElementById(`page-${p}`).classList.contains('active'));if(e.key==='ArrowLeft'&&ci>0)switchPage(pages[ci-1]);if(e.key==='ArrowRight'&&ci<pages.length-1)switchPage(pages[ci+1])});
+
+// Виджет «Сегодня» при прокрутке
+window.addEventListener('scroll',()=>{
+    const w=document.getElementById('today-widget');
+    const hero=document.getElementById('today-hero');
+    if(!hero||!w)return;
+    const rect=hero.getBoundingClientRect();
+    w.classList.toggle('show',rect.bottom<60);
+},{passive:true});
+
+// ЗАПУСК
+updateAllNames();renderToday();updateWidgets();loadSettings();
+setTimeout(checkNotifications,1500);
+setInterval(()=>{const n=new Date();n.setHours(0,0,0,0);if(n.getTime()!==TODAY.getTime())location.reload()},6e4);
+</script>
+</body>
+</html>
